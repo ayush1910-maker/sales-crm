@@ -27,4 +27,20 @@ export const env = cleanEnv(process.env, {
     default: 'http://localhost:5173',
     desc: 'Frontend URL for CORS origin allowlist',
   }),
+  JWT_ACCESS_SECRET: str({
+    default: 'development-jwt-access-secret-key-32-chars-min',
+    desc: 'Secret key for signing short-lived access JWTs',
+  }),
+  JWT_REFRESH_SECRET: str({
+    default: 'development-jwt-refresh-secret-key-32-chars-min',
+    desc: 'Secret key for signing refresh JWTs',
+  }),
+  JWT_ACCESS_EXPIRES_IN: str({
+    default: '15m',
+    desc: 'Access token expiration time (e.g. 15m)',
+  }),
+  JWT_REFRESH_EXPIRES_IN: str({
+    default: '7d',
+    desc: 'Refresh token expiration time (e.g. 7d)',
+  }),
 });
