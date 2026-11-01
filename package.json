@@ -4,9 +4,9 @@
   "private": true,
   "description": "Multi-tenant Lead Generation CRM - Modular Monolith",
   "scripts": {
-    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "npm --prefix server run dev",
-    "dev:client": "npm --prefix client run dev",
+    "dev": "node init && concurrently -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "node init && npm --prefix server run dev",
+    "dev:client": "node init && npm --prefix client run dev",
     "install:all": "npm install && npm --prefix server install && npm --prefix client install",
     "lint": "npm --prefix server run lint && npm --prefix client run lint",
     "format": "prettier --write \"**/*.{js,jsx,json,md,yml,yaml}\"",

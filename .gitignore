@@ -8,8 +8,6 @@ dist/
 build/
 
 # Environment files
-.env
-.env.local
 .env.*.local
 *.env
 
@@ -21,7 +19,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Editor / OS
-.vscode/
 .idea/
 .DS_Store
 Thumbs.db
@@ -30,3 +27,7 @@ Thumbs.db
 .nyc_output/
 coverage/
 .vitest/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+config.bat
