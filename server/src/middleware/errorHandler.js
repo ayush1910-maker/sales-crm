@@ -6,9 +6,20 @@ export const errorHandler = (err, req, res, _next) => {
   let error = err;
 
   if (!(error instanceof ApiError)) {
-    const statusCode = error.statusCode || (error.name === 'ValidationError' ? 400 : 500);
-    const message = error.message || 'Internal Server Error';
-    error = new ApiError(statusCode, message, error.errors || [], err.stack);
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || error.keyValue || {})[0] || 'field';
+      error = new ApiError(409, `A record with that ${field} already exists`);
+    } else if (error.name === 'JsonWebTokenError') {
+      error = new ApiError(401, 'Invalid authentication token');
+    } else if (error.name === 'TokenExpiredError') {
+      error = new ApiError(401, 'Authentication token expired');
+    } else if (error.name === 'CastError') {
+      error = new ApiError(400, `Invalid ID format for ${error.path}`);
+    } else {
+      const statusCode = error.statusCode || (error.name === 'ValidationError' ? 400 : 500);
+      const message = error.message || 'Internal Server Error';
+      error = new ApiError(statusCode, message, error.errors || [], err.stack);
+    }
   }
 
   const response = {

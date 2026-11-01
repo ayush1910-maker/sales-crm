@@ -289,11 +289,7 @@ erDiagram
         ObjectId _id PK
         ObjectId orgId FK
         ObjectId userId FK
-        string keyword
-        string country
-        string state
-        string city
-        string locality
+        string query
         number requestedLimit
         number resultsReturned
         number leadsCreated
@@ -388,11 +384,7 @@ erDiagram
 {
   orgId:           { type: ObjectId, ref: 'Organization', required: true },
   userId:          { type: ObjectId, ref: 'User', required: true },
-  keyword:         String,
-  country:         String,
-  state:           String,
-  city:            String,
-  locality:        String,
+  query:           { type: String, required: true, trim: true }, // Complete search query (e.g. "clinic in Vijay Nagar, Indore, Madhya Pradesh, India")
   requestedLimit:  Number,
   resultsReturned: Number,
   leadsCreated:    Number,
@@ -581,13 +573,12 @@ Errors:
 | GET | `/search/logs` | Org Admin | Paginated search history |
 
 **POST `/search` request body (Zod schema):**
+> [!NOTE]
+> Revised Lead Search Experience (Phase 3): Users enter the complete search query in one input (e.g. `clinic in Vijay Nagar, Indore, Madhya Pradesh, India`). No separate country, state, city, or locality dropdowns are used. The complete query is passed directly to the Places search provider.
+
 ```typescript
 {
-  keyword:   string (min 2, max 100),
-  country:   string (required),
-  state:     string (optional),
-  city:      string (optional),
-  locality:  string (optional),
+  query:     string (min 2, max 200), // Complete search query (e.g., 'clinic in Vijay Nagar, Indore, Madhya Pradesh, India')
   limit:     enum [20, 50, 100],
   filters?: {
     requirePhone:   boolean,
@@ -699,7 +690,7 @@ createdBefore, createdAfter
 
 ```mermaid
 flowchart TD
-    A["POST /search receives query"] --> B["Build textQuery string\n'Clinics in Vijay Nagar Indore India'"]
+    A["POST /search receives full query\ne.g., 'clinic in Vijay Nagar, Indore, Madhya Pradesh, India'"] --> B["Pass complete query string directly\nto Places search provider"]
     B --> C["Call Places API v1\ntextSearch endpoint\nFieldMask: places.displayName, places.id,\nplaces.formattedAddress, places.nationalPhoneNumber,\nplaces.websiteUri, places.rating, places.userRatingCount,\nplaces.primaryType, places.googleMapsUri"]
     C --> D{"pageToken in response?"}
     D -->|Yes, more needed| E["Delay 200 ms\nFetch next page"]
@@ -931,14 +922,15 @@ flowchart LR
 - Frontend: Login, Register, basic AppShell, AuthContext
 
 ### Phase 3 — Search & Leads (Core Value)
-- `mockPlacesAdapter` with fixtures
-- `googlePlacesAdapter` with pagination + error handling
+- Revised Lead Search Experience: Single-input search query (e.g. `clinic in Vijay Nagar, Indore, Madhya Pradesh, India`), no dropdowns; complete query passed directly to Places search provider
+- `mockPlacesAdapter` with fixtures supporting complete query strings
+- `googlePlacesAdapter` with pagination + error handling using complete query string
 - `placesAdapter` factory toggled by env
 - Search routes: `/search`, `/search/import`
 - `Lead` model + indexes
 - `mergeLeadData` utility
-- `SearchLog` model
-- Frontend: SearchForm, ResultsPreview, ImportConfirm modal, LeadsTable, LeadDrawer
+- `SearchLog` model (tracking full query string)
+- Frontend: SearchForm (single query input), ResultsPreview, ImportConfirm modal, LeadsTable, LeadDrawer
 
 ### Phase 4 — Dashboard & Export
 - Dashboard stats aggregation pipeline
@@ -984,7 +976,8 @@ flowchart LR
 - [ ] All auth routes pass integration tests
 
 ### Phase 3
-- [ ] `PLACES_PROVIDER=mock` returns seeded fixture data without calling Google
+- [ ] Users enter complete search query in one input (e.g. `clinic in Vijay Nagar, Indore, Madhya Pradesh, India`), no dropdowns
+- [ ] `PLACES_PROVIDER=mock` returns seeded fixture data without calling Google using the complete query string
 - [ ] Search with `limit=50` returns ≤50 results, paginating across multiple API pages
 - [ ] Duplicate Place ID within same org is not created twice
 - [ ] Re-importing a lead updates source fields but preserves `crmStatus`, `notes`, `followUpDate`
