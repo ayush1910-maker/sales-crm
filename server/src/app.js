@@ -1,11 +1,14 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import { env } from './config/env.js';
 import { ApiResponse } from './utils/ApiResponse.js';
 import { ApiError } from './utils/ApiError.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import authRoutes from './modules/auth/auth.routes.js';
+import orgRoutes from './modules/organizations/org.routes.js';
 
 export const createApp = () => {
   const app = express();
@@ -18,6 +21,7 @@ export const createApp = () => {
       credentials: true,
     })
   );
+  app.use(cookieParser());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -47,6 +51,10 @@ export const createApp = () => {
       message: 'Database is disconnected',
     });
   });
+
+  // API v1 Feature Routes
+  app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/orgs', orgRoutes);
 
   // Catch-all 404 for undefined routes
   app.use((req, res, next) => {
